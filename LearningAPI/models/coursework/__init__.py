@@ -1,5 +1,6 @@
 from .project import Project
 from .project_note import ProjectNote
+from .project_info import ProjectInfo
 from .course import Course
 from .book import Book
 from .lightning_exercise import LightningExercise

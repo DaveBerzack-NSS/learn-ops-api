@@ -10,6 +10,7 @@ class Project(models.Model):
     index = models.IntegerField(default=0)
     active = models.BooleanField(default=True)
     is_group_project = models.BooleanField(default=False)
+    is_advanced_project = models.BooleanField(default=False)
 
     @property
     def course(self):
