@@ -70,19 +70,44 @@ class ProjectViewSet(ViewSet):
         Returns:
             Response -- Empty body with 204 status code
         """
+        is_advanced = request.data.get("is_advanced_project", None)
+        description = request.data.get("description", None)
+        template_url = request.data.get("template_url", None)
         url = request.data.get("implementation_url", "")
 
+        if is_advanced is not None and is_advanced is True:
+            if description is None or template_url is None:
+                return Response("Description and Template URL are required for advanced projects", status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             project = Project.objects.get(pk=pk)
             project.name = request.data["name"]
             project.active = request.data["active"]
             project.index = request.data["index"]
             project.is_group_project = request.data["is_group_project"]
+            project.is_advanced_project = is_advanced
             project.implementation_url = url
-
             project.save()
+
+            if is_advanced is True:
+                try:
+                    project_info = ProjectInfo.objects.get(project=project)
+                except ProjectInfo.DoesNotExist:
+                    project_info = ProjectInfo()
+                project_info.description = description
+                project_info.template_url = template_url
+                project_info.project = project
+                project_info.save()
+            else:
+                project_info = ProjectInfo.objects.get(project=project)
+                if project_info is not None:
+                    project_info.delete()
+
         except Project.DoesNotExist:
             return Response(None, status=status.HTTP_404_NOT_FOUND)
+        
+        except ProjectInfo.DoesNotExist:
+            pass
 
         except Exception as ex:
             return HttpResponseServerError(ex)
